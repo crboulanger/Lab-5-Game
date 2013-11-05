@@ -1,4 +1,4 @@
-/*Captain Branchflower
+/*Christopher Boulanger
  */
 
 #include <msp430g2553.h>
@@ -24,26 +24,27 @@ void clearPlayer(unsigned char player)
 
 unsigned char movePlayer(unsigned char player, unsigned char direction)
 {
+	clearPlayer(player);
         switch (direction) {
         		case UP:
-        			player ^=BIT6;
+        			player &= ~BIT6;
         			break;
         		case DOWN:
-        			player ^=BIT6;
+        			player |=BIT6;
         			break;
         		case RIGHT:
-        			player ++;
-        			if (player>0x87 & player<0xC0){
-        			            player=0xC0;
+        			if (player<0x87 || player>=0xC0){
+        				player ++;
         			}
         			break;
         		case LEFT:
-        			player --;
-        			if (player<0xC0 & player > 0x87){
-        				player=0x87;
+
+        			if ((player & 0x0f)>0){
+        				player --;
         			}
         }
-        return player;
+       printPlayer(player);
+       return player;
 }
 
 char didPlayerWin(unsigned char player)

@@ -4,12 +4,13 @@
  *
  * This is shell code for the game to be implemented in Lab 4.  It provides basic functions that may prove useful in accomplishing the lab.
  */
+#ifndef GAME_H_
+#define	GAME_H_
 
-
-#define UP 1
-#define DOWN 2
-#define LEFT 3
-#define RIGHT 4
+#define UP 3
+#define DOWN 4
+#define LEFT 2
+#define RIGHT 1
 
 #define ROW_MASK 0x40
 
@@ -47,3 +48,4 @@ char didPlayerHitMine(unsigned char player, unsigned char mines[NUM_MINES]);
 void generateMines(unsigned char mines[NUM_MINES]);
 void printMines(unsigned char mines[NUM_MINES]);
 */
+#endif /*GAME_H_*/
