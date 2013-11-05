@@ -18,6 +18,9 @@
 void init_timer();
 void init_buttons();
 
+char btnPush=0;
+char timerCount=0;
+
 int main(void)
 {
         WDTCTL = (WDTPW|WDTHOLD);
@@ -58,10 +61,39 @@ int main(void)
 
 void init_timer()
 {
-        // do timer initialization work
+        TACTL &= ~(PC1|MC0);
+
+        TACTL |= TACLR;
+
+        setspeed_1MHz();
+        TACTL |=TASSEL1;
+        TACTL |=ID1|ID0;
+        TACTL &= ~TAIFG;
+
+        TACTL |=MC1;
+        TACTL |=TAIE;
 }
 
 void init_buttons()
 {
-        // do button initialization work
+        configureP2PinAsButton(2);
+        configureP2PinAsButton(3);
+        configureP2PinAsButton(4);
+        configureP2PinAsButton(5);
+        P2IES |= BIT2|BIT3|BIT4|BIT5;
+        P2IFG &= BIT2|BIT3|BIT4|BIT5;
+        P2IE |= BIT2|BIT3|BIT4|BIT5;
+}
+
+#pragma vector= TIMER0_A1_VECTOR
+__interrupt void TIMER0_A1_ISR(){
+	TACTL &= TAIFG;
+	count++;
+}
+
+#pragma vector = PORT2_VECTOR
+__interrupt void PORT_2_ISR(){
+	if(P2IFG,BIT3){
+		btnPush = RIGHT;
+	}
 }

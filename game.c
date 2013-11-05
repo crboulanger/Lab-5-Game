@@ -25,11 +25,24 @@ void clearPlayer(unsigned char player)
 unsigned char movePlayer(unsigned char player, unsigned char direction)
 {
         switch (direction) {
-                //
-                // update player position based on direction of movement
-                //
+        		case UP:
+        			player ^=BIT6;
+        			break;
+        		case DOWN:
+        			player ^=BIT6;
+        			break;
+        		case RIGHT:
+        			player ++;
+        			if (player>0x87 & player<0xC0){
+        			            player=0xC0;
+        			}
+        			break;
+        		case LEFT:
+        			player --;
+        			if (player<0xC0 & player > 0x87){
+        				player=0x87;
+        			}
         }
-
         return player;
 }
 
