@@ -7,7 +7,7 @@
 
 unsigned char initPlayer()
 {
-        return 0x80;
+        return 0x80;/// player starts at address 0x80 corresponding to top left LCD square
 }
 
 void printPlayer(unsigned char player)
@@ -33,9 +33,9 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
         			player |=BIT6;
         			break;
         		case RIGHT:
-        			if (player<0x87 || player>=0xC0){
-        				player ++;
-        			}
+        			if (player<0x87 || player>=0xC0){// doesn't allow player to go out of bounds
+        				player ++;					///// could add functionality here that prompts game over for out of bounds
+        			}								///// could add functionality here that loops the boundaries ex) at location 0x87... right... print new location 0xC0
         			break;
         		case LEFT:
 
@@ -49,5 +49,5 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 
 char didPlayerWin(unsigned char player)
 {
-        return player == 0xC7;
+        return player == 0xC7;/// winning square is bottom right/// could add functionality to print a square around the finish line square
 }

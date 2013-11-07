@@ -12,21 +12,21 @@
  */
 #include <msp430.h>
 #include "game.h"
-#include "button.h"
-#include "LCD.h"
-#include "clkSpeed.h"
+#include "button.h" //Captain Branchflower
+#include "LCD.h" //from last lab
+#include "clkSpeed.h" //makes clock speed
 
 void init_timer();
 void init_buttons();
 void moveProperPlayer(char buttonToTest);
 void Reset(char buttonToTest);
 
-char player=0;
+char player=0; //initialize flags to 0
 char gameover=0;
 char btnPush=0;
 char timerCount=0;
 
-void clearTimer(){
+void clearTimer(){	//clear timer at the beginning of the game and after button push
 	timerCount=0;
 	TACTL |= TACLR;
 }
@@ -35,18 +35,18 @@ int main(void)
 {
         WDTCTL = (WDTPW|WDTHOLD);
 
-        player = initPlayer();
+        player = initPlayer();//beginning of the game
         initSPI();
         initLCD();
         clearLCD();
         printPlayer(player);
         init_timer();
         init_buttons();
-        __enable_interrupt();
+        __enable_interrupt();//enable locals and globals, enable maskable interrupts
 
         while(1)
         {
-             if (player==0xC7){
+             if (player==0xC7){		//winning condition
             	 TACTL &= ~TAIE;
             	 clearLCD();
             	 line1Cursor();
@@ -56,7 +56,7 @@ int main(void)
             	 gameover=1;
             	 _delay_cycles(100000);
              }
-             if (timerCount>=4){
+             if (timerCount>=4){	//losing condition
             	 TACTL &= ~TAIE;
             	 clearLCD();
             	 line1Cursor();
@@ -73,22 +73,22 @@ int main(void)
 
 void init_timer()
 {
-        TACTL &= ~(MC1|MC0);
+        TACTL &= ~(MC1|MC0); //stop timer
 
-        TACTL |= TACLR;
+        TACTL |= TACLR;	//clear TAR
 
         setspeed_1MHz();
-        TACTL |=TASSEL1;
-        TACTL |=ID1|ID0;
-        TACTL &= ~TAIFG;
+        TACTL |=TASSEL1;	// configure for SMCLK frequency roughly 1MHz
+        TACTL |=ID1|ID0;	//divide clock by 8
+        TACTL &= ~TAIFG; 	// clear interrupt flag
 
-        TACTL |=MC1;
-        TACTL |=TAIE;
+        TACTL |=MC1;		// set count mode to continuous
+        TACTL |=TAIE;		// enable interrupt
 }
 
 void init_buttons()
 {
-		configureP2PinAsButton(BIT2);
+		configureP2PinAsButton(BIT2);// pins on chip to interface with buttons
 	    configureP2PinAsButton(BIT3);
 	    configureP2PinAsButton(BIT4);
 	    configureP2PinAsButton(BIT5);
@@ -101,7 +101,7 @@ void testAndRespondToButtonPush(char buttonToTest){
 	if (buttonToTest & P2IFG){
 		if(buttonToTest & P2IES){
 			moveProperPlayer(buttonToTest);
-			clearTimer();
+			clearTimer(); //timer countdown starts again as soon as button is released
 		}
 		else{
 			debounce();
@@ -145,13 +145,13 @@ void Reset(char buttonToTest){
 	}
 }
 
-#pragma vector= TIMER0_A1_VECTOR
-__interrupt void TIMER0_A1_ISR(){
+#pragma vector= TIMER0_A1_VECTOR //interrupt vectors
+__interrupt void TIMER0_A1_ISR(){  //timer interrupt
 	TACTL &= ~TAIFG;
 	timerCount++;
 }
 
-#pragma vector = PORT2_VECTOR
+#pragma vector = PORT2_VECTOR	//button push interrupt vector
 __interrupt void PORT_2_ISR(){
 	if(gameover==0){
 		testAndRespondToButtonPush(BIT2);
@@ -167,7 +167,7 @@ __interrupt void PORT_2_ISR(){
 	}
 }
 
-
+/////PsuedoCode for main.c
 /*
                  * while (game is on)
                  * {
