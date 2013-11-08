@@ -4,6 +4,9 @@
 #include <msp430g2553.h>
 #include "game.h"
 #include "LCD.h"
+#include "rand.h"
+
+char isGameWinnable(unsigned char mines[NUM_MINES]);
 
 unsigned char initPlayer()
 {
@@ -50,4 +53,45 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 char didPlayerWin(unsigned char player)
 {
         return player == 0xC7;/// winning square is bottom right/// could add functionality to print a square around the finish line square
+}
+char didPlayerHitMine(unsigned char player, unsigned char mines[NUM_MINES]){
+        int i, hit = 0;
+        for(i = 0; i < NUM_MINES; i++){
+                if(player == mines[i]){
+                        hit = 1;
+                }
+        }
+        return hit;
+}
+
+int generateMines(unsigned char mines[NUM_MINES],unsigned int seed){
+        unsigned char winnable = 0;
+        while(!winnable){
+                seed = prand(seed);
+                mines[0] = 0x81 + (seed % 7);
+
+                seed = prand(seed);
+                mines[1] = 0xC0 + (seed % 7);
+
+                winnable = isGameWinnable(mines);
+        }
+        return seed;
+}
+void printMines(unsigned char mines[NUM_MINES]){
+        int i;
+        for(i = 0; i < NUM_MINES; i++){
+                writeCommandByte(mines[i]);
+                writeDataByte('?');
+        }
+}
+
+char isGameWinnable(unsigned char mines[NUM_MINES]){
+        char top = mines[0];
+        char bottom = mines[1];
+        //& with 0x0f in order to check only the lower nibble
+        top = top & 0x0f;
+        bottom = bottom & 0x0f;
+
+        //checks up&down and the diagonals, if either of these occur the game is unwinnable
+        return !(top == bottom || top+1 == bottom || top-1 == bottom);
 }

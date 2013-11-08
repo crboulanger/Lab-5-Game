@@ -15,16 +15,24 @@
 #include "button.h" //Captain Branchflower
 #include "LCD.h" //from last lab
 #include "clkSpeed.h" //makes clock speed
+#include "rand.h"
 
 void init_timer();
 void init_buttons();
 void moveProperPlayer(char buttonToTest);
 void Reset(char buttonToTest);
+void testAndRespondToButtonPush(char buttonToTest);
+void newGame();
+void gameOver();
+
 
 char player=0; //initialize flags to 0
 char gameover=0;
 char btnPush=0;
 char timerCount=0;
+unsigned char mines[2];
+unsigned int seed;
+
 
 void clearTimer(){	//clear timer at the beginning of the game and after button push
 	timerCount=0;
@@ -39,7 +47,10 @@ int main(void)
         initSPI();
         initLCD();
         clearLCD();
-        printPlayer(player);
+
+        seed = prand(1234);
+        newGame();
+
         init_timer();
         init_buttons();
         __enable_interrupt();//enable locals and globals, enable maskable interrupts
@@ -56,15 +67,19 @@ int main(void)
             	 gameover=1;
             	 _delay_cycles(100000);
              }
+             if(didPlayerHitMine(player, mines) && gameover == 0){ //gameover == 0 because I want this to show once, and not to alternate between game over and kaboom
+                 TACTL &= ~TAIE;
+                 clearLCD();
+                 line1Cursor();
+                 writeString("BOOM!");
+                 line2Cursor();
+                 writeString("Hit Mine");
+                 _delay_cycles(200000);
+                 gameOver();
+             }
              if (timerCount>=4){	//losing condition
             	 TACTL &= ~TAIE;
-            	 clearLCD();
-            	 line1Cursor();
-            	 writeString("GAME");
-            	 line2Cursor();
-            	 writeString("OVER!");
-            	 gameover=1;
-            	 _delay_cycles(100000);
+            	 gameOver();
              }
         }
 
@@ -96,7 +111,23 @@ void init_buttons()
         P2IFG &= ~BIT2|BIT3|BIT4|BIT5;
         P2IE |= BIT2|BIT3|BIT4|BIT5;
 }
-
+void newGame(){
+        gameover = 0;
+        clearLCD();
+        player = initPlayer();
+        printPlayer(player);
+        seed = generateMines(mines, seed);
+        printMines(mines);
+}
+void gameOver(){
+        clearLCD();
+        line1Cursor();
+        writeString("Game");
+        line2Cursor();
+        writeString("Over!");
+        gameover = 1;
+        _delay_cycles(100000);
+}
 void testAndRespondToButtonPush(char buttonToTest){
 	if (buttonToTest & P2IFG){
 		if(buttonToTest & P2IES){
